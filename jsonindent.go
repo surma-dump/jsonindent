@@ -47,7 +47,7 @@ func main() {
 				return
 			}
 			defer f.Close()
-			log.SetPrefix(file+": ")
+			log.SetPrefix(file + ": ")
 			jsonindent(f)
 			log.SetPrefix("")
 		}()
@@ -56,17 +56,23 @@ func main() {
 
 func jsonindent(r io.Reader) {
 	d := json.NewDecoder(r)
-	var v interface{}
-	e := d.Decode(&v)
-	if e != nil {
-		log.Printf("Could not unmarshall: %s\n", e)
-		return
-	}
+	var e error
+	for e == nil {
+		var v interface{}
+		e = d.Decode(&v)
+		if e != nil {
+			if e != io.EOF {
+				log.Printf("Could not unmarshall: %s\n", e)
+			}
+			continue
+		}
 
-	b, e := json.MarshalIndent(v, "", "\t")
-	if e != nil {
-		log.Printf("Could not marshall: %s\n", e)
-		return
+		b, e := json.MarshalIndent(v, "", "\t")
+		if e != nil {
+			log.Printf("Could not marshall: %s\n", e)
+			continue
+		}
+		output.Write(b)
+		output.Write([]byte("\n"))
 	}
-	output.Write(b)
 }
