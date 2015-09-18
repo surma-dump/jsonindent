@@ -56,6 +56,7 @@ func main() {
 
 func jsonindent(r io.Reader) {
 	d := json.NewDecoder(r)
+	d.UseNumber()
 	var e error
 	for e == nil {
 		var v interface{}
